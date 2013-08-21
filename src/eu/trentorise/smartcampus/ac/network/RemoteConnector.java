@@ -96,7 +96,7 @@ public class RemoteConnector {
         final HttpResponse resp;
         final HttpEntity entity = null;
         Log.i(TAG, "refreshing token: " + refresh);
-        String url = service + PATH_TOKEN+"?grant_type=refresh_token&refresh_token="+refresh+"&clien_id="+clientId +"&client_secret="+clientSecret;
+        String url = service + PATH_TOKEN+"?grant_type=refresh_token&refresh_token="+refresh+"&client_id="+clientId +"&client_secret="+clientSecret;
         final HttpPost post = new HttpPost(url);
         post.setEntity(entity);
         post.setHeader("Accept", "application/json");
