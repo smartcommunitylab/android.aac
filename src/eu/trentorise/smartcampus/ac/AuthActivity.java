@@ -148,8 +148,11 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 		if (intent.getStringExtra(Constants.KEY_AUTHORITY) != null) {
 			url += intent.getStringExtra(Constants.KEY_AUTHORITY);
 		}
-		
-		url += "?client_id="+getIntent().getStringExtra(CLIENT_ID)+"&response_type=code&redirect_uri="+Constants.getOkUrl(this);
+		String redirect = Constants.getOkUrl(this);
+		if (intent.hasExtra(Constants.KEY_REDIRECT_URI)) {
+			redirect = intent.getStringExtra(Constants.KEY_REDIRECT_URI);
+		}
+		url += "?client_id="+getIntent().getStringExtra(CLIENT_ID)+"&response_type=code&redirect_uri="+redirect;
 	    mWebView.loadUrl(url);
 
 	}
@@ -178,6 +181,29 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 				}
 				return true;
 			} 
+			if (isOkResultUrl(url)) {
+				Uri uri = Uri.parse(url);	
+				String access_token = uri.getQueryParameter("access_token");
+				String scope = uri.getQueryParameter("scope");
+				String refresh_token = uri.getQueryParameter("refresh_token");
+				String type = uri.getQueryParameter("token_type");
+				String expInStr = uri.getQueryParameter("expires_in");
+				int expires_in = Integer.parseInt(expInStr);
+				if (access_token == null || access_token.length() == 0 ||
+					scope == null || scope.length() == 0 ||	
+					refresh_token == null || refresh_token.length() == 0 ||
+					expires_in <= 0) 
+				{
+					throw new IllegalArgumentException("Incorrect token data");
+				}
+				TokenData tokenData = new TokenData();
+				tokenData.setAccess_token(access_token);
+				tokenData.setExpires_in(expires_in);
+				tokenData.setRefresh_token(refresh_token);
+				tokenData.setScope(scope);
+				tokenData.setToken_type(type);
+				authListener.onTokenAcquired(tokenData);
+			}
 			if (isCancelUrl(url)) {
 				authListener.onAuthCancelled();
 				return true;
@@ -192,7 +218,9 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 					verified  = verifyUrl(url);
 				} catch (NameNotFoundException e) {
 					authListener.onAuthFailed("No auth url specified.");
-				}
+				} catch (Exception e) {
+					authListener.onAuthFailed("Authentication problem: "+e.getMessage());
+				}	 
 			} 
 			if (!verified) {
 	            super.onPageStarted(view, url, favicon);
@@ -247,16 +275,21 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 				authListener.onTokenAcquired(data);
 			}
 		}
-		
-		
 	}
 
 	/**
 	 * @param url
-	 * @return true if the url is the correct redirect url with code request parameter
+	 * @return true if the url is the correct default redirect url with code request parameter
 	 */
 	public boolean isOkUrl(String url) {
 		return url.startsWith(Constants.getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("code") != null;
+	}
+	/**
+	 * @param url
+	 * @return true if the url is the correct token result url with token data parameters
+	 */
+	public boolean isOkResultUrl(String url) {
+		return url.startsWith(Constants.getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("access_token") != null;
 	}
 	/**
 	 * @param url

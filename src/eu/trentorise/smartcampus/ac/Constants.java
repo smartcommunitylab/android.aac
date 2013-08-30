@@ -37,15 +37,15 @@ public class Constants {
      * App scope key
      */
 	public static final String KEY_SCOPE = "eu.trentorise.smartcampus.account.SCOPE";
-	
+    /**
+     * App redirect URI key: the uri to which the authorization will redirect
+     */
+	public static final String KEY_REDIRECT_URI = "eu.trentorise.smartcampus.account.REDIRECT_URI";
 	/**
 	 * Failure result code
 	 */
 	public static final int RESULT_FAILURE = 2;
 
-
-	public static final String APP_METADATA_SHARED_PACKAGE = "SHARED_PACKAGE";
-	
 	// Shared package path
 	private static final String SHARED_PACKAGE = "eu.trentorise.smartcampus.launcher";
 	
