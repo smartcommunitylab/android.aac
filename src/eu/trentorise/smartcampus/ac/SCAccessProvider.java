@@ -58,11 +58,12 @@ public interface SCAccessProvider {
 	String readToken(Context ctx, String clientId, String clientSecret) throws AACException; 
 
 	/** 
-	 * Invalidate the authentication tokens and clear the locally stored data.
+	 * Invalidate the authentication tokens and clear the locally stored data. Not to be called on UI thread
 	 * @param ctx
 	 * @param clientId clientID of the application.
 	 * @param clientSecret client secret of the application.
+	 * @return true if the logout was successful
 	 */
-	void logout(Context ctx) throws AACException;
+	boolean logout(Context ctx) throws AACException;
 	
 }

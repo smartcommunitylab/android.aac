@@ -134,6 +134,7 @@ public class RemoteConnector {
             resp = getHttpClient().execute(get);
             if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 Log.v(TAG, "Successful revoke");
+                return;
             }
             Log.e(TAG, "Error validating " + resp.getStatusLine());
             throw new AACException("Error validating " + resp.getStatusLine());

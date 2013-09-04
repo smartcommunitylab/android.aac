@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import eu.trentorise.smartcampus.ac.AACException;
@@ -84,27 +83,23 @@ public class EmbeddedSCAccessProvider implements SCAccessProvider{
 	}
 
 	@Override
-	public void logout(final Context ctx) throws AACException {
+	public boolean logout(final Context ctx) throws AACException {
 		final String token;
 		try {
 			token = Preferences.getAccessToken(ctx);
-			Preferences.clear(ctx);
+			try {
+				RemoteConnector.revokeToken(Constants.getAuthUrl(ctx), token);
+				Preferences.clear(ctx);
+				return true;
+			} catch (NameNotFoundException e) {
+				Log.e(EmbeddedSCAccessProvider.class.getName(), ""+e.getMessage());
+			} catch (AACException e) {
+				Log.e(EmbeddedSCAccessProvider.class.getName(), ""+e.getMessage());
+			}
+			return false;
 		} catch (NameNotFoundException e) {
 			throw new AACException(e.getMessage(),e);
 		}
-		new AsyncTask<Void, Void, Void>() {
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					RemoteConnector.revokeToken(Constants.getAuthUrl(ctx), token);
-				} catch (NameNotFoundException e) {
-					Log.e(EmbeddedSCAccessProvider.class.getName(), ""+e.getMessage());
-				} catch (AACException e) {
-					Log.e(EmbeddedSCAccessProvider.class.getName(), ""+e.getMessage());
-				}
-				return null;
-			}
-		};
 	}
 	
 }
