@@ -15,6 +15,8 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.ac;
 
+import java.net.URLEncoder;
+
 import android.accounts.AccountAuthenticatorActivity;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -153,6 +155,9 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 			redirect = intent.getStringExtra(Constants.KEY_REDIRECT_URI);
 		}
 		url += "?client_id="+getIntent().getStringExtra(CLIENT_ID)+"&response_type=code&redirect_uri="+redirect;
+		if (intent.hasExtra(Constants.KEY_SCOPE)) {
+			url += "&scope="+URLEncoder.encode(intent.getStringExtra(Constants.KEY_SCOPE));
+		}
 	    mWebView.loadUrl(url);
 
 	}
