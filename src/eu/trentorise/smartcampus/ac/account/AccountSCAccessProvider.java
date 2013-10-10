@@ -41,9 +41,11 @@ import eu.trentorise.smartcampus.ac.network.RemoteConnector;
 public class AccountSCAccessProvider extends SCAccessProvider {
 
 	@Override
-	public boolean login(Activity activity, String clientId, String clientSecret, Bundle extras) throws AACException {
-		assert clientId != null;
+	public boolean login(Activity activity, Bundle extras) throws AACException {
 
+		String clientId = Constants.getClientId(activity);
+		String clientSecret = Constants.getClientSecret(activity);
+		
 		String aTokenType = Constants.getAccountTokenType(activity);
 		String accountType;
 		try {
@@ -68,8 +70,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 	}
 
 	@Override
-	public String readToken(Context ctx, String clientId, String clientSecret) throws AACException {
-		assert clientId != null;
+	public String readToken(Context ctx) throws AACException {
 
 		String aTokenType = Constants.getAccountTokenType(ctx);
 		String accountType;
@@ -96,6 +97,8 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 					String refresh = am.getUserData(a, Constants.KEY_REFRESH_TOKEN+aTokenType);
 					TokenData data;
 					try {
+						String clientId = Constants.getClientId(ctx);
+						String clientSecret = Constants.getClientSecret(ctx);
 						data = RemoteConnector.refreshToken(Constants.getAuthUrl(ctx), refresh, clientId, clientSecret);
 					} catch (NameNotFoundException e) {
 						throw new AACException(e.getMessage());

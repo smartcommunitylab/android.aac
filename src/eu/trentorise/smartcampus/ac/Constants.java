@@ -42,6 +42,10 @@ public class Constants {
 	/** Account label */
 	private static final String KEY_ACCOUNT_BASED_ACCESS = "eu.trentorise.smartcampus.account.ACCOUNT_BASED_ACCESS";
 	
+	/** Account label */
+	private static final String KEY_CLIENT_ID = "eu.trentorise.smartcampus.account.CLIENT_ID";
+	/** Account label */
+	private static final String KEY_CLIENT_SECRET = "eu.trentorise.smartcampus.account.CLIENT_SECRET";
 
 	/**
      * App authority key
@@ -122,6 +126,38 @@ public class Constants {
 		throw new NameNotFoundException("Account name should be specified in application metadata");
 	}
 
+	/**
+	 * Read the client ID from application metadata
+	 * @param context
+	 * @return
+	 * @throws NameNotFoundException
+	 */
+	public static String getClientId(Context ctx) {
+		try {
+			ApplicationInfo info = ctx.getPackageManager().getApplicationInfo(ctx.getPackageName(), PackageManager.GET_META_DATA);
+			if (info != null && info.metaData != null && info.metaData.containsKey(KEY_CLIENT_ID)) 
+				return info.metaData.getString(KEY_CLIENT_ID);
+		} catch (NameNotFoundException e) {
+		}
+		return null;
+	}
+	/**
+	 * Read the client secret from application metadata
+	 * @param context
+	 * @return
+	 * @throws NameNotFoundException
+	 */
+	public static String getClientSecret(Context ctx) {
+		try {
+			ApplicationInfo info = ctx.getPackageManager().getApplicationInfo(ctx.getPackageName(), PackageManager.GET_META_DATA);
+			if (info != null && info.metaData != null && info.metaData.containsKey(KEY_CLIENT_SECRET)) 
+				return info.metaData.getString(KEY_CLIENT_SECRET);
+		} catch (NameNotFoundException e) {
+		}
+		return null;
+	}
+
+	
 	/**
 	 * Read the account token type 
 	 * @param context

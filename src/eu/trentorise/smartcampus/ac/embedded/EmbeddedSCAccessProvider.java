@@ -36,9 +36,10 @@ import eu.trentorise.smartcampus.ac.network.RemoteConnector;
 public class EmbeddedSCAccessProvider extends SCAccessProvider{
 
 	@Override
-	public boolean login(Activity activity, String clientId, String clientSecret, Bundle extras) throws AACException  {
-		assert clientId != null;
-		assert clientSecret != null;
+	public boolean login(Activity activity, Bundle extras) throws AACException  {
+
+		String clientId = Constants.getClientId(activity);
+		String clientSecret = Constants.getClientSecret(activity);
 		
 		String token;
 		try {
@@ -61,7 +62,7 @@ public class EmbeddedSCAccessProvider extends SCAccessProvider{
 	}
 
 	@Override
-	public String readToken(Context ctx, String clientId, String clientSecret) throws AACException {
+	public String readToken(Context ctx) throws AACException {
 		try {
 			String token = Preferences.getAccessToken(ctx);
 			Long expTime = Preferences.getExpirationTime(ctx);
@@ -69,6 +70,9 @@ public class EmbeddedSCAccessProvider extends SCAccessProvider{
 			if (expTime > System.currentTimeMillis() + 60*1000) {
 				return token;
 			} else {
+				String clientId = Constants.getClientId(ctx);
+				String clientSecret = Constants.getClientSecret(ctx);
+
 				TokenData data = RemoteConnector.refreshToken(Constants.getAuthUrl(ctx), Preferences.getRefreshToken(ctx), clientId, clientSecret);
 				Preferences.setAccessToken(ctx, data.getAccess_token());
 				if (data.getRefresh_token() != null && data.getRefresh_token().length() > 0) {

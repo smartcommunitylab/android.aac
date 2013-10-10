@@ -44,25 +44,21 @@ public abstract class SCAccessProvider {
 	 *  to handle the possible outcomes.
 	 * 
 	 * @param activity Activity to be used to call authentication activity.
-	 * @param clientId clientID of the application.
-	 * @param clientSecret client secret of the application.
 	 * @param extras additional parameters, may be null. May include the values for {@link Constants#KEY_AUTHORITY}
 	 * to explicitly define the authority used to login the user and for {@link Constants#KEY_SCOPE} to explicitly
 	 * define the request authorization scope for the app.
 	 * 
 	 * @return true if the login is performed for the first time, false otherwise
 	 */
-	public abstract boolean login(Activity activity, String clientId, String clientSecret, Bundle extras) throws AACException;
+	public abstract boolean login(Activity activity, Bundle extras) throws AACException;
 
 	/**
 	 * Try to read the token stored, or retrieve it from the remote service 
 	 * if the refresh token is available. 
 	 * @param ctx {@link Context} of the token retrieval.
-	 * @param clientId clientID of the application.
-	 * @param clientSecret client secret of the application.
 	 * @return valid token value or null if the valid token is not available (i.e., user not authenticated)
 	 */
-	public abstract String readToken(Context ctx, String clientId, String clientSecret) throws AACException; 
+	public abstract String readToken(Context ctx) throws AACException; 
 
 	/** 
 	 * Invalidate the authentication tokens and clear the locally stored data. Not to be called on UI thread
