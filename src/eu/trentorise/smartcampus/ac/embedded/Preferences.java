@@ -18,8 +18,9 @@ package eu.trentorise.smartcampus.ac.embedded;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import eu.trentorise.smartcampus.ac.Constants;
 
 /**
  * Utility class that allows Smart Campus applications to have a common cloud
@@ -34,6 +35,11 @@ public final class Preferences {
 	private static final String REFRESH_TOKEN = "REFRESH_TOKEN";
 	private static final String EXPIRES_IN = "EXPIRES_IN";
 	
+	// Name for preferences
+	private static final String COMMON_PREF = "COMMON_PREF";
+	// Access mode (private to application and other ones with same Shared UID)
+	private static final int ACCESS = Context.MODE_PRIVATE|Context.CONTEXT_RESTRICTED;
+
 	// ======================================================================= //
 	// GETTERS & SETTERS
 	// ======================================================================= //
@@ -43,7 +49,7 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static String getAccessToken(Context context) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		return prefs.getString(ACCESS_TOKEN, null);
 	}
 	
@@ -52,7 +58,7 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static void setAccessToken(Context context, String token) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		Editor edit = prefs.edit();
 		edit.putString(ACCESS_TOKEN, token);
 		edit.commit();
@@ -63,7 +69,7 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static String getRefreshToken(Context context) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		return prefs.getString(REFRESH_TOKEN, null);
 	}
 	
@@ -72,7 +78,7 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static void setRefreshToken(Context context, String token) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		Editor edit = prefs.edit();
 		edit.putString(REFRESH_TOKEN, token);
 		edit.commit();
@@ -83,7 +89,7 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static Long getExpirationTime(Context context) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		return prefs.getLong(EXPIRES_IN, 0);
 	}
 	
@@ -92,7 +98,7 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static void setExpirationTime(Context context, int expires_in) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		Editor edit = prefs.edit();
 		edit.putLong(EXPIRES_IN, System.currentTimeMillis()+1000*expires_in);
 		edit.commit();
@@ -109,12 +115,29 @@ public final class Preferences {
 	 * @throws NameNotFoundException 
 	 */
 	static void clear(Context context) throws NameNotFoundException{
-		SharedPreferences prefs = Constants.getPrefs(context);
+		SharedPreferences prefs = getPrefs(context);
 		Editor edit = prefs.edit();
 		edit.remove(ACCESS_TOKEN);
 		edit.remove(REFRESH_TOKEN);
 		edit.remove(EXPIRES_IN);
 		edit.commit();
 	}
-	
+
+	/**
+	 * Read the shared preferences file where common properties are stored
+	 * @param context
+	 * @return
+	 * @throws NameNotFoundException
+	 */
+	static SharedPreferences getPrefs(Context context) throws NameNotFoundException {
+		Context sharedContext = context.createPackageContext(getSharedPackage(context), ACCESS);
+		return sharedContext.getSharedPreferences(COMMON_PREF, ACCESS);
+	}
+
+	private static String getSharedPackage(Context ctx) throws NameNotFoundException {
+		ApplicationInfo info = ctx.getPackageManager().getApplicationInfo(ctx.getPackageName(), PackageManager.GET_META_DATA);
+		return info.packageName;
+	}
+
+
 }

@@ -18,6 +18,8 @@ package eu.trentorise.smartcampus.ac;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import eu.trentorise.smartcampus.ac.account.AccountSCAccessProvider;
+import eu.trentorise.smartcampus.ac.embedded.EmbeddedSCAccessProvider;
 
 /**
  * A reference interface for the Smart Campus Access Control library. Defines methods for the 
@@ -26,9 +28,14 @@ import android.os.Bundle;
  * @author raman
  *
  */
-public interface SCAccessProvider {
+public abstract class SCAccessProvider {
 
 	public static final int SC_AUTH_ACTIVITY_REQUEST_CODE = 1000;
+	
+	public static SCAccessProvider getInstance(Context ctx) {
+		if (Constants.isAccountBasedAccess(ctx)) return new AccountSCAccessProvider();
+		return new EmbeddedSCAccessProvider();
+	}
 	
 	/**
 	 * Verify the user is already logged in and the necessary token have been obtained. Otherwise,
@@ -45,7 +52,7 @@ public interface SCAccessProvider {
 	 * 
 	 * @return true if the login is performed for the first time, false otherwise
 	 */
-	boolean login(Activity activity, String clientId, String clientSecret, Bundle extras) throws AACException;
+	public abstract boolean login(Activity activity, String clientId, String clientSecret, Bundle extras) throws AACException;
 
 	/**
 	 * Try to read the token stored, or retrieve it from the remote service 
@@ -55,7 +62,7 @@ public interface SCAccessProvider {
 	 * @param clientSecret client secret of the application.
 	 * @return valid token value or null if the valid token is not available (i.e., user not authenticated)
 	 */
-	String readToken(Context ctx, String clientId, String clientSecret) throws AACException; 
+	public abstract String readToken(Context ctx, String clientId, String clientSecret) throws AACException; 
 
 	/** 
 	 * Invalidate the authentication tokens and clear the locally stored data. Not to be called on UI thread
@@ -64,6 +71,6 @@ public interface SCAccessProvider {
 	 * @param clientSecret client secret of the application.
 	 * @return true if the logout was successful
 	 */
-	boolean logout(Context ctx) throws AACException;
+	public abstract boolean logout(Context ctx) throws AACException;
 	
 }

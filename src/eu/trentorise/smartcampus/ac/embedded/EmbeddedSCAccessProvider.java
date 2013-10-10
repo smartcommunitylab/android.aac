@@ -33,7 +33,7 @@ import eu.trentorise.smartcampus.ac.network.RemoteConnector;
  * @author raman
  *
  */
-public class EmbeddedSCAccessProvider implements SCAccessProvider{
+public class EmbeddedSCAccessProvider extends SCAccessProvider{
 
 	@Override
 	public boolean login(Activity activity, String clientId, String clientSecret, Bundle extras) throws AACException  {

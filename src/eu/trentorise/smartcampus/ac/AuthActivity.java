@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import android.accounts.AccountAuthenticatorActivity;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
@@ -150,7 +151,7 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 		if (intent.getStringExtra(Constants.KEY_AUTHORITY) != null) {
 			url += intent.getStringExtra(Constants.KEY_AUTHORITY);
 		}
-		String redirect = Constants.getOkUrl(this);
+		String redirect = getOkUrl(this);
 		if (intent.hasExtra(Constants.KEY_REDIRECT_URI)) {
 			redirect = intent.getStringExtra(Constants.KEY_REDIRECT_URI);
 		}
@@ -178,7 +179,7 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 				String clientId = getIntent().getStringExtra(CLIENT_ID);
 				String clientSecret = getIntent().getStringExtra(CLIENT_SECRET);
 				String scope = getIntent().getStringExtra(Constants.KEY_SCOPE);
-				String redirectUri = Constants.getOkUrl(AuthActivity.this);
+				String redirectUri = getOkUrl(AuthActivity.this);
 				if (code != null) {
 					new ValidateAsyncTask().execute(code, clientId, clientSecret, scope, redirectUri);
 				} else {
@@ -287,21 +288,32 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 	 * @return true if the url is the correct default redirect url with code request parameter
 	 */
 	public boolean isOkUrl(String url) {
-		return url.startsWith(Constants.getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("code") != null;
+		return url.startsWith(getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("code") != null;
 	}
 	/**
 	 * @param url
 	 * @return true if the url is the correct token result url with token data parameters
 	 */
 	public boolean isOkResultUrl(String url) {
-		return url.startsWith(Constants.getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("access_token") != null;
+		return url.startsWith(getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("access_token") != null;
 	}
 	/**
 	 * @param url
 	 * @return true if the url is the correct redirect url with code request parameter
 	 */
 	public boolean isCancelUrl(String url) {
-		return url.startsWith(Constants.getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("error") != null;
+		return url.startsWith(getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("error") != null;
 	}
+
+	/**
+	 * Retrieve the SmartCampus correct redirect URL
+	 * @param context
+	 * @return
+	 * @throws NameNotFoundException
+	 */
+	static String getOkUrl(Context context) {
+		return "http://localhost";
+	}
+
 
 }
