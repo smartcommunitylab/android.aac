@@ -78,11 +78,15 @@ public class Constants {
 	 * @throws NameNotFoundException
 	 */
 	public static String getAuthUrl(Context context) throws NameNotFoundException {
+		String URL = null;
 		ApplicationInfo info = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
 		if (info != null && info.metaData != null && info.metaData.containsKey(KEY_AUTH_URL)) {
-			return info.metaData.getString(KEY_AUTH_URL);
+			URL = info.metaData.getString(KEY_AUTH_URL);
 		}
-		return DEF_AUTH_BASE_URL;
+		else URL=DEF_AUTH_BASE_URL;
+		if (!URL.endsWith("/"))
+			URL+="/";
+		return URL;
 	}
 
 	/**
