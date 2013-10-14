@@ -41,6 +41,16 @@ public class AuthenticatorActivity  extends AuthActivity {
 		return new AMAuthListener();
 	}
 
+	@Override
+	protected String getClientId() {
+		return Constants.getClientId(getApplicationContext());
+	}
+
+	@Override
+	protected String getClientSecret() {
+		return Constants.getClientSecret(getApplicationContext());
+	}
+
 	private class AMAuthListener implements AuthListener {
 
 		@Override

@@ -47,6 +47,18 @@ public class EmbeddedAuthActivity extends AuthActivity {
 	}
 
     @Override
+	protected String getClientId() {
+    	return getIntent().getStringExtra(CLIENT_ID);
+	}
+
+
+	@Override
+	protected String getClientSecret() {
+    	return getIntent().getStringExtra(CLIENT_SECRET);
+	}
+
+
+	@Override
 	protected AuthListener getAuthListener() {
 		return new AMAuthListener();
 	}

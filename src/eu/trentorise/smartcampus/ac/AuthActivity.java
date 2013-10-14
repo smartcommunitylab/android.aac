@@ -133,6 +133,9 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
         mCrossImage.setVisibility(View.INVISIBLE);
     } 
 
+    protected abstract String getClientId();
+    protected abstract String getClientSecret();
+    
 	private void startWebView() {
 		mWebView.setWebViewClient(new AuthWebViewClient());
         Intent intent = getIntent();
@@ -155,7 +158,7 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 		if (intent.hasExtra(Constants.KEY_REDIRECT_URI)) {
 			redirect = intent.getStringExtra(Constants.KEY_REDIRECT_URI);
 		}
-		url += "?client_id="+getIntent().getStringExtra(CLIENT_ID)+"&response_type=code&redirect_uri="+redirect;
+		url += "?client_id="+getClientId() +"&response_type=code&redirect_uri="+redirect;
 		if (intent.hasExtra(Constants.KEY_SCOPE)) {
 			url += "&scope="+URLEncoder.encode(intent.getStringExtra(Constants.KEY_SCOPE));
 		}
@@ -176,8 +179,8 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 		private boolean verifyUrl(String url) throws NameNotFoundException {
 			if (isOkUrl(url)){
 				String code = Uri.parse(url).getQueryParameter("code");
-				String clientId = getIntent().getStringExtra(CLIENT_ID);
-				String clientSecret = getIntent().getStringExtra(CLIENT_SECRET);
+				String clientId = getClientId();
+				String clientSecret = getClientSecret();
 				String scope = getIntent().getStringExtra(Constants.KEY_SCOPE);
 				String redirectUri = getOkUrl(AuthActivity.this);
 				if (code != null) {
