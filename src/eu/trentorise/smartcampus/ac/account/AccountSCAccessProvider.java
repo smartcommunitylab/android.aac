@@ -60,7 +60,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 			return true;
 		} else {
 			Account a = accounts[0];
-			String token = am.peekAuthToken(a, null);
+			String token = am.peekAuthToken(a, aTokenType);
 			if (token == null) {
 				am.getAuthToken(a, aTokenType, null, null, new Callback(activity, clientId, clientSecret, extras), null);
 				return true;
@@ -83,7 +83,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 		Account[] accounts = am.getAccountsByType(accountType);
 		if (accounts != null && accounts.length > 0) {
 			Account a = accounts[0];
-			String token = am.peekAuthToken(a, null);
+			String token = am.peekAuthToken(a, aTokenType);
 			if (token != null) {
 				String expires = am.getUserData(a, Constants.KEY_EXPIRES_IN+aTokenType);
 				long expTime = 0;
@@ -129,7 +129,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 		Account[] accounts = am.getAccountsByType(accountType);
 		if (accounts != null && accounts.length != 0) {
 			Account a = accounts[0];
-			String token = am.peekAuthToken(a, null);
+			String token = am.peekAuthToken(a, aTokenType);
 			if (token == null) {
 				try {
 					RemoteConnector.revokeToken(Constants.getAuthUrl(ctx), token);
