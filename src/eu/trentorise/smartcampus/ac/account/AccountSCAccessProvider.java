@@ -27,7 +27,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.util.Log;
 import eu.trentorise.smartcampus.ac.AACException;
-import eu.trentorise.smartcampus.ac.AuthActivity;
 import eu.trentorise.smartcampus.ac.Constants;
 import eu.trentorise.smartcampus.ac.SCAccessProvider;
 import eu.trentorise.smartcampus.ac.embedded.EmbeddedSCAccessProvider;
@@ -42,10 +41,6 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 
 	@Override
 	public boolean login(Activity activity, Bundle extras) throws AACException {
-
-		String clientId = Constants.getClientId(activity);
-		String clientSecret = Constants.getClientSecret(activity);
-		
 		String aTokenType = Constants.getAccountTokenType(activity);
 		String accountType;
 		try {
@@ -56,13 +51,13 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 		final AccountManager am = AccountManager.get(activity);
 		Account[] accounts = am.getAccountsByType(accountType);
 		if (accounts == null || accounts.length == 0) {
-			am.addAccount(accountType, aTokenType, null, null, null, new Callback(activity, clientId, clientSecret, extras), null);
+			am.addAccount(accountType, aTokenType, null, null, null, new Callback(activity, extras), null);
 			return true;
 		} else {
 			Account a = accounts[0];
 			String token = am.peekAuthToken(a, aTokenType);
 			if (token == null) {
-				am.getAuthToken(a, aTokenType, null, null, new Callback(activity, clientId, clientSecret, extras), null);
+				am.getAuthToken(a, aTokenType, null, null, new Callback(activity, extras), null);
 				return true;
 			}
 		}
@@ -71,7 +66,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 
 	@Override
 	public String readToken(Context ctx) throws AACException {
-
+		
 		String aTokenType = Constants.getAccountTokenType(ctx);
 		String accountType;
 		try {
@@ -95,10 +90,10 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 					return token;
 				} else {
 					String refresh = am.getUserData(a, Constants.KEY_REFRESH_TOKEN+aTokenType);
-					TokenData data;
+					TokenData data = null;
 					try {
-						String clientId = Constants.getClientId(ctx);
-						String clientSecret = Constants.getClientSecret(ctx);
+						String clientId = Preferences.readValue(ctx, Preferences.KEY_CLIENT_ID);
+						String clientSecret = Preferences.readValue(ctx, Preferences.KEY_CLIENT_SECRET);
 						data = RemoteConnector.refreshToken(Constants.getAuthUrl(ctx), refresh, clientId, clientSecret);
 					} catch (NameNotFoundException e) {
 						throw new AACException(e.getMessage());
@@ -151,14 +146,10 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 		
 		private Bundle extras;
 		private Activity activity;
-		private String clientSecret;
-		private String clientId;
 
-		public Callback(Activity activity, String clientId, String clientSecret, Bundle extras) {
+		public Callback(Activity activity, Bundle extras) {
 			super();
 			this.activity = activity;
-			this.clientSecret = clientSecret;
-			this.clientId = clientId;
 			this.extras = extras;
 		}
 
@@ -172,9 +163,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 					if (extras != null) {
 						launch.putExtras(extras);
 					}
-					launch.putExtra(AuthActivity.CLIENT_ID, clientId);
-					launch.putExtra(AuthActivity.CLIENT_SECRET, clientSecret);
-						activity.startActivityForResult(launch, SC_AUTH_ACTIVITY_REQUEST_CODE);
+					activity.startActivityForResult(launch, SC_AUTH_ACTIVITY_REQUEST_CODE);
 				}
 			} catch (Exception e) {
 				return;

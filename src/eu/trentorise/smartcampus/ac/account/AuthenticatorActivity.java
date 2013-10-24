@@ -43,12 +43,24 @@ public class AuthenticatorActivity  extends AuthActivity {
 
 	@Override
 	protected String getClientId() {
-		return Constants.getClientId(getApplicationContext());
+		String clientId = Constants.getClientId(getApplicationContext());
+		try {
+			Preferences.writeValue(this, Preferences.KEY_CLIENT_ID, clientId);
+		} catch (NameNotFoundException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+		return clientId;
 	}
 
 	@Override
 	protected String getClientSecret() {
-		return Constants.getClientSecret(getApplicationContext());
+		String clientSecret = Constants.getClientSecret(getApplicationContext());
+		try {
+			Preferences.writeValue(this, Preferences.KEY_CLIENT_SECRET, clientSecret);
+		} catch (NameNotFoundException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+		return clientSecret;
 	}
 
 	private class AMAuthListener implements AuthListener {
