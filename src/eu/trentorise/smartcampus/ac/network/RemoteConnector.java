@@ -16,14 +16,20 @@
 
 package eu.trentorise.smartcampus.ac.network;
 
+import java.net.URLEncoder;
+import java.util.ArrayList;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
@@ -51,12 +57,21 @@ public class RemoteConnector {
         final HttpResponse resp;
         final HttpEntity entity = null;
         Log.i(TAG, "validating code: " + code);
-        String url = service + PATH_TOKEN+"?grant_type=authorization_code&code="+code+"&client_id="+clientId +"&client_secret="+clientSecret+"&redirect_uri="+redirectUri;
-        if (scope != null) url+= "&scope="+scope;
-        final HttpPost post = new HttpPost(url);
-        post.setEntity(entity);
+//        String url = service + PATH_TOKEN+"?grant_type=authorization_code&code="+code+"&client_id="+clientId +"&client_secret="+clientSecret+"&redirect_uri="+redirectUri;
+//        if (scope != null) url+= "&scope="+scope;
+        final HttpPost post = new HttpPost(service+PATH_TOKEN);
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("grant_type", "authorization_code"));
+        params.add(new BasicNameValuePair("code", code));
+        params.add(new BasicNameValuePair("client_id", clientId));
+        params.add(new BasicNameValuePair("client_secret", clientSecret));
+        params.add(new BasicNameValuePair("redirect_uri", redirectUri));
+        if(scope!=null)
+        	params.add(new BasicNameValuePair("scope", scope));
+        
         post.setHeader("Accept", "application/json");
         try {
+        	post.setEntity(new UrlEncodedFormEntity(params));
             resp = getHttpClient().execute(post);
             final String response = EntityUtils.toString(resp.getEntity());
             if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {

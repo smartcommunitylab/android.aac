@@ -233,6 +233,7 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 			} 
 			if (!verified) {
 	            super.onPageStarted(view, url, favicon);
+	            //TODO debug
 	            mSpinner.show();
 			} else {
 	            mWebView.setVisibility(View.INVISIBLE);
