@@ -125,7 +125,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 		if (accounts != null && accounts.length != 0) {
 			Account a = accounts[0];
 			String token = am.peekAuthToken(a, aTokenType);
-			if (token == null) {
+			if (token != null) {
 				try {
 					RemoteConnector.revokeToken(Constants.getAuthUrl(ctx), token);
 					am.invalidateAuthToken(accountType, token);
