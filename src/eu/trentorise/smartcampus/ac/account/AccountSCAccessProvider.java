@@ -87,8 +87,9 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 				}
 				// have a margin of 1 min
 //				if (expTime > System.currentTimeMillis() + 60*1000) {
-				// temporal patch: margin of 10 min
-				if (expTime > System.currentTimeMillis() + 10*60*1000) {
+				// temporal patch: margin of 10 min and not more than 1 hour
+				if (expTime > System.currentTimeMillis() + 10*60*1000 && 
+					expTime - System.currentTimeMillis() < 60*60*1000) {
 					return token;
 				} else {
 					String refresh = am.getUserData(a, Constants.KEY_REFRESH_TOKEN+aTokenType);
