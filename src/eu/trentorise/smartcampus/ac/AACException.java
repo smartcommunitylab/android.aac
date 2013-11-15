@@ -15,9 +15,16 @@
  */
 package eu.trentorise.smartcampus.ac;
 
+/**
+ * Exception of AAC library possibly carrying the status code;
+ * @author raman
+ *
+ */
 public class AACException extends Exception {
 	private static final long serialVersionUID = 1263952752723997093L;
 
+	private int status = -1;
+	
 	public AACException() {
 		super();
 	}
@@ -34,5 +41,12 @@ public class AACException extends Exception {
 		super(cause);
 	}
 
-	
+	public AACException(int status, String message) {
+		super(message);
+		this.status = status;
+	}
+
+	public int getStatus() {
+		return status;
+	}
 }

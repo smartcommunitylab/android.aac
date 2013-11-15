@@ -86,10 +86,15 @@ public class AuthenticatorActivity  extends AuthActivity {
 				}
 			 }
 			
-			Bundle dataBundle = new Bundle(); 
-			dataBundle.putString(Constants.KEY_REFRESH_TOKEN+aTokenType, data.getRefresh_token());
-			dataBundle.putString(Constants.KEY_EXPIRES_IN+aTokenType, ""+(System.currentTimeMillis()+1000*data.getExpires_in()));
-			mAccountManager.addAccountExplicitly(account, null, dataBundle);
+			 // temporal patch: expires in 1 hour
+ 			 long expTime = System.currentTimeMillis()+1000L*60*60;
+//			 long expTime = System.currentTimeMillis()+1000L*data.getExpires_in();
+
+			 
+			 Bundle dataBundle = new Bundle(); 
+			 dataBundle.putString(Constants.KEY_REFRESH_TOKEN+aTokenType, data.getRefresh_token());
+			 dataBundle.putString(Constants.KEY_EXPIRES_IN+aTokenType, ""+expTime);
+			 mAccountManager.addAccountExplicitly(account, null, dataBundle);
 			 
 		     mAccountManager.setAuthToken(account, aTokenType, data.getAccess_token());
 

@@ -85,8 +85,10 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 				if (expires != null) {
 					expTime = Long.parseLong(expires);
 				}
-				// have a margine of 1 min
-				if (expTime > System.currentTimeMillis() + 60*1000) {
+				// have a margin of 1 min
+//				if (expTime > System.currentTimeMillis() + 60*1000) {
+				// temporal patch: margin of 10 min
+				if (expTime > System.currentTimeMillis() + 10*60*1000) {
 					return token;
 				} else {
 					String refresh = am.getUserData(a, Constants.KEY_REFRESH_TOKEN+aTokenType);
@@ -102,7 +104,10 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 					if (data.getRefresh_token() != null && data.getRefresh_token().length() > 0) {
 						am.setUserData(a, Constants.KEY_REFRESH_TOKEN+aTokenType, data.getRefresh_token());
 					}
-					am.setUserData(a, Constants.KEY_EXPIRES_IN+aTokenType, ""+(System.currentTimeMillis()+1000*data.getExpires_in()));
+					// temporal patch: expires in 1 hour
+					am.setUserData(a, Constants.KEY_EXPIRES_IN+aTokenType, ""+(System.currentTimeMillis()+1000*60*60));
+//					am.setUserData(a, Constants.KEY_EXPIRES_IN+aTokenType, ""+(System.currentTimeMillis()+1000*data.getExpires_in()));
+					
 					return data.getAccess_token();
 				}
 

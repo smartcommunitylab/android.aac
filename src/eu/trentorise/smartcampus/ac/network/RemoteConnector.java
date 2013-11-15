@@ -16,7 +16,6 @@
 
 package eu.trentorise.smartcampus.ac.network;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
@@ -55,7 +54,6 @@ public class RemoteConnector {
 
 	public static TokenData validateAccessCode(String service, String code, String clientId, String clientSecret, String scope, String redirectUri) throws AACException {
         final HttpResponse resp;
-        final HttpEntity entity = null;
         Log.i(TAG, "validating code: " + code);
 //        String url = service + PATH_TOKEN+"?grant_type=authorization_code&code="+code+"&client_id="+clientId +"&client_secret="+clientSecret+"&redirect_uri="+redirectUri;
 //        if (scope != null) url+= "&scope="+scope;
@@ -97,7 +95,7 @@ public class RemoteConnector {
         ConnManagerParams.setTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
         
         // return httpClient;
-        return new HttpsClientBuilder().getNewHttpClient(params);
+        return HttpsClientBuilder.getNewHttpClient(params);
     }
 
 	/**
@@ -108,27 +106,30 @@ public class RemoteConnector {
 	 * @throws AACException 
 	 */
 	public static TokenData refreshToken(String service, String refresh, String clientId, String clientSecret) throws AACException {
-        final HttpResponse resp;
-        final HttpEntity entity = null;
+        HttpResponse resp = null;
+        HttpEntity entity = null;
         Log.i(TAG, "refreshing token: " + refresh);
         String url = service + PATH_TOKEN+"?grant_type=refresh_token&refresh_token="+refresh+"&client_id="+clientId +"&client_secret="+clientSecret;
-        final HttpPost post = new HttpPost(url);
+        HttpPost post = new HttpPost(url);
         post.setEntity(entity);
         post.setHeader("Accept", "application/json");
         try {
             resp = getHttpClient().execute(post);
-            final String response = EntityUtils.toString(resp.getEntity());
+            String response = EntityUtils.toString(resp.getEntity());
             if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             	TokenData data = TokenData.valueOf(response);
                 Log.v(TAG, "Successful authentication");
                 return data;
             }
             Log.e(TAG, "Error validating " + resp.getStatusLine());
-            Log.e(TAG, "Error validating " + resp.getStatusLine());
             throw new AACException("Error validating " + resp.getStatusLine());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "Exception when getting authtoken", e);
-            throw new AACException(e);
+            if (resp != null) {
+            	throw new AACException(resp.getStatusLine().getStatusCode(), ""+e.getMessage());
+            } else {
+            	throw new AACException(e);
+            }
         } finally {
             Log.v(TAG, "refresh token completing");
         }
