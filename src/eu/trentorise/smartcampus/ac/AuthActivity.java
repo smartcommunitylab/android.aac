@@ -15,35 +15,21 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.ac;
 
-import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
 import android.accounts.AccountAuthenticatorActivity;
-import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.net.http.SslError;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import eu.trentorise.smartcampus.ac.model.TokenData;
-import eu.trentorise.smartcampus.ac.network.RemoteConnector;
+import eu.trentorise.smartcampus.ac.authorities.AuthorityHandler;
+import eu.trentorise.smartcampus.ac.authorities.AuthorityHelper;
 
 /**
  * Abstract android activity to handle the authentication interactions. 
@@ -54,270 +40,121 @@ import eu.trentorise.smartcampus.ac.network.RemoteConnector;
  * @author raman
  *
  */
-@SuppressLint("SetJavaScriptEnabled")
 public abstract class AuthActivity extends AccountAuthenticatorActivity {
 
-    static final FrameLayout.LayoutParams FILL =
-            new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                             ViewGroup.LayoutParams.MATCH_PARENT);
 	public static final String CLIENT_ID = "client_id";
 	public static final String CLIENT_SECRET = "client_secret"; 
+
+    static final LinearLayout.LayoutParams WRAP =
+            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                             ViewGroup.LayoutParams.WRAP_CONTENT);
+
+    static {
+    	WRAP.setMargins(10, 10, 10, 10);
+    }
     
-	protected WebView mWebView;
-    private ProgressDialog mSpinner; 
-    private ImageView mCrossImage; 
-    private FrameLayout mContent;
+
     private AuthListener authListener = getAuthListener();
+    private AuthorityHandler mHandler = null;
+    private Collection<String> mAuthorities = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
-      setUp();
+      requestWindowFeature(Window.FEATURE_NO_TITLE); 
+      setContentView(R.layout.authorities);
+      setUpAuthorities();
     }
     
-    protected void setUp() {
-        mSpinner = new ProgressDialog(this);
-        mSpinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mSpinner.setMessage("Loading..."); 
-        requestWindowFeature(Window.FEATURE_NO_TITLE); 
-        mContent = new FrameLayout(this); 
-
-        createCrossImage(); 
-        int crossWidth = mCrossImage.getDrawable().getIntrinsicWidth();
-        setUpWebView(crossWidth / 2); 
-        
-        mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        addContentView(mContent, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)); 
+    protected void setUpAuthorities() {
+        Intent intent = getIntent();
+		if (intent.getStringExtra(Constants.KEY_AUTHORITY) != null) {
+			mHandler = AuthorityHelper.getAuthorityHandlerForName(intent.getStringExtra(Constants.KEY_AUTHORITY));
+			if (mHandler != null) {
+				mAuthorities = Collections.singletonList(intent.getStringExtra(Constants.KEY_AUTHORITY));
+			}
+		} else {
+			mAuthorities = AuthorityHelper.getAuthorities(this);
+			for (Iterator<String> iterator = mAuthorities.iterator(); iterator.hasNext();) {
+				String a = iterator.next();
+				if (AuthorityHelper.getAuthorityHandlerForName(a) == null) {
+					iterator.remove();
+				}
+			}
+		}
+		if (mAuthorities.size() == 0) {
+			authListener.onAuthFailed("No authorities");
+		}
+		
+		if (mAuthorities.size() == 1) {
+			mHandler = AuthorityHelper.getAuthorityHandlerForName(mAuthorities.iterator().next());
+			mHandler.authenticate(this, authListener, getClientId(), getClientSecret());
+		} else {
+			prepareLayout();
+		}
+    	
     }
-
-    private void setUpWebView(int margin) {
-        LinearLayout webViewContainer = new LinearLayout(this);
-        mWebView = new WebView(this);
-        mWebView.setVerticalScrollBarEnabled(false);
-        mWebView.setHorizontalScrollBarEnabled(false);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        CookieSyncManager.createInstance(getApplicationContext());
-        CookieManager cookieManager = CookieManager.getInstance(); 
-        cookieManager.removeAllCookie();
-        
-        startWebView();
-        mWebView.setLayoutParams(FILL);
-        mWebView.setVisibility(View.INVISIBLE);
-        
-        webViewContainer.setPadding(margin, margin, margin, margin);
-        webViewContainer.addView(mWebView);
-        mContent.addView(webViewContainer);
-    } 
     
+    /**
+	 * @param mAuthorities
+	 */
+	private void prepareLayout() {
+		findViewById(R.id.authority_container).setVisibility(View.VISIBLE);
+		LinearLayout ll = (LinearLayout)findViewById(R.id.button_container);
+		ll.removeAllViews();
+		for (String a : mAuthorities) {
+			Button b = new Button(this);
+//			b.setLayoutParams(WRAP);
+			b.setTextColor(getResources().getColor(android.R.color.white));
+			b.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+			b.setText(AuthorityHelper.getAuthorityLabelForName(a));
+			b.setOnClickListener(new AuthButtonClickListener(AuthorityHelper.getAuthorityHandlerForName(a)));
+			ll.addView(b,WRAP);
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (mHandler != null) {
+			
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
     @Override
     public void onBackPressed() {
-    	super.onBackPressed();
-    	authListener.onAuthCancelled();
-
+    	if (mHandler == null || mAuthorities != null && mAuthorities.size() == 1) {
+        	super.onBackPressed();
+        	authListener.onAuthCancelled();
+    	} else {
+    		if (mHandler != null) {
+    			mHandler.cancel();
+    			mHandler = null;
+    		}
+    		prepareLayout();
+    	}
     }
-    
-    private void createCrossImage() {
-        mCrossImage = new ImageView(this);
-        // Dismiss the dialog when user click on the 'x'
-        mCrossImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            	authListener.onAuthCancelled();
-            }
-        });
-        Drawable crossDrawable = getResources().getDrawable(R.drawable.close);
-        mCrossImage.setImageDrawable(crossDrawable);
-        /* 'x' should not be visible while webview is loading
-         * make it visible only after webview has fully loaded
-        */
-        mCrossImage.setVisibility(View.INVISIBLE);
-    } 
 
     protected abstract String getClientId();
     protected abstract String getClientSecret();
-    
-	private void startWebView() {
-		mWebView.setWebViewClient(new AuthWebViewClient());
-        Intent intent = getIntent();
-        
-		String url;
-		try {
-			url = Constants.getAuthUrl(this);
-		} catch (NameNotFoundException e) {
-			authListener.onAuthFailed("Failed to obtain AAC url");
-			return;
-		}
-		if (intent.getStringExtra(Constants.KEY_AUTHORITY) != null) {
-			url += (url.endsWith("/")?intent.getStringExtra(Constants.KEY_AUTHORITY):"/"+intent.getStringExtra(Constants.KEY_AUTHORITY));
-		}
-		url += (url.endsWith("/") ? "" : "/") + "eauth/authorize";
-		if (intent.getStringExtra(Constants.KEY_AUTHORITY) != null) {
-			url += intent.getStringExtra(Constants.KEY_AUTHORITY);
-		}
-		String redirect = getOkUrl(this);
-		if (intent.hasExtra(Constants.KEY_REDIRECT_URI)) {
-			redirect = intent.getStringExtra(Constants.KEY_REDIRECT_URI);
-		}
-		url += "?client_id="+getClientId() +"&response_type=code&redirect_uri="+redirect;
-		if (intent.hasExtra(Constants.KEY_SCOPE)) {
-			url += "&scope="+URLEncoder.encode(intent.getStringExtra(Constants.KEY_SCOPE));
-		}
-	    mWebView.loadUrl(url);
-
-	}
-
 	protected abstract AuthListener getAuthListener();
 
-	public class AuthWebViewClient extends WebViewClient {
-		
-		private boolean verified = false;
+	private class AuthButtonClickListener implements OnClickListener {
 
-		public AuthWebViewClient() {
+		AuthorityHandler ah;
+
+		public AuthButtonClickListener(AuthorityHandler ah) {
 			super();
+			this.ah = ah;
 		}
 
-		private boolean verifyUrl(String url) throws NameNotFoundException {
-			if (isOkUrl(url)){
-				String code = Uri.parse(url).getQueryParameter("code");
-				String clientId = getClientId();
-				String clientSecret = getClientSecret();
-				String scope = getIntent().getStringExtra(Constants.KEY_SCOPE);
-				String redirectUri = getOkUrl(AuthActivity.this);
-				if (code != null) {
-					new ValidateAsyncTask().execute(code, clientId, clientSecret, scope, redirectUri);
-				} else {
-					authListener.onAuthFailed("No token provided");
-				}
-				return true;
-			} 
-			if (isOkResultUrl(url)) {
-				Uri uri = Uri.parse(url);	
-				String access_token = uri.getQueryParameter("access_token");
-				String scope = uri.getQueryParameter("scope");
-				String refresh_token = uri.getQueryParameter("refresh_token");
-				String type = uri.getQueryParameter("token_type");
-				String expInStr = uri.getQueryParameter("expires_in");
-				int expires_in = Integer.parseInt(expInStr);
-				if (access_token == null || access_token.length() == 0 ||
-					scope == null || scope.length() == 0 ||	
-					refresh_token == null || refresh_token.length() == 0 ||
-					expires_in <= 0) 
-				{
-					throw new IllegalArgumentException("Incorrect token data");
-				}
-				TokenData tokenData = new TokenData();
-				tokenData.setAccess_token(access_token);
-				tokenData.setExpires_in(expires_in);
-				tokenData.setRefresh_token(refresh_token);
-				tokenData.setScope(scope);
-				tokenData.setToken_type(type);
-				authListener.onTokenAcquired(tokenData);
-			}
-			if (isCancelUrl(url)) {
-				authListener.onAuthCancelled();
-				return true;
-			}
-			return false;
+		@Override
+		public void onClick(View v) {
+			mHandler = ah;
+			findViewById(R.id.authority_container).setVisibility(View.INVISIBLE);
+			mHandler.authenticate(AuthActivity.this, getAuthListener(), getClientId(), getClientSecret());
 		}
-
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-			if (!verified) {
-				try {
-					verified  = verifyUrl(url);
-				} catch (NameNotFoundException e) {
-					authListener.onAuthFailed("No auth url specified.");
-				} catch (Exception e) {
-					authListener.onAuthFailed("Authentication problem: "+e.getMessage());
-				}	 
-			} 
-			if (!verified) {
-	            super.onPageStarted(view, url, favicon);
-	            //TODO debug
-	            mSpinner.show();
-			} else {
-	            mWebView.setVisibility(View.INVISIBLE);
-	            mCrossImage.setVisibility(View.INVISIBLE);
-			}
-        }  
 		
-		@Override
-		public void onPageFinished(WebView view, String url) {
-			if (!verified) {
-				super.onPageFinished(view, url);
-	            mSpinner.dismiss();
-	            /* 
-	             * Once webview is fully loaded, set the mContent background to be transparent
-	             * and make visible the 'x' image. 
-	             */
-	            mContent.setBackgroundColor(Color.TRANSPARENT);
-	            mWebView.setVisibility(View.VISIBLE);
-	            mCrossImage.setVisibility(View.VISIBLE);
-			}
-        }
-
-		@Override
-		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) 
-		{
-			handler.proceed();
-		}
 	}
-
-	private class ValidateAsyncTask extends AsyncTask<String, Void, TokenData> {
-
-		@Override
-		protected TokenData doInBackground(String... params) {
-			try {
-				return RemoteConnector.validateAccessCode(Constants.getAuthUrl(AuthActivity.this), params[0], params[1], params[2], params[3], params[4]);
-			} catch (NameNotFoundException e) {
-				return null;
-			} catch (AACException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(TokenData data) {
-			if (data == null || data.getAccess_token() == null) {
-				authListener.onAuthFailed("Token validation failed");
-			} else {
-				authListener.onTokenAcquired(data);
-			}
-		}
-	}
-
-	/**
-	 * @param url
-	 * @return true if the url is the correct default redirect url with code request parameter
-	 */
-	public boolean isOkUrl(String url) {
-		return url.startsWith(getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("code") != null;
-	}
-	/**
-	 * @param url
-	 * @return true if the url is the correct token result url with token data parameters
-	 */
-	public boolean isOkResultUrl(String url) {
-		return url.startsWith(getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("access_token") != null;
-	}
-	/**
-	 * @param url
-	 * @return true if the url is the correct redirect url with code request parameter
-	 */
-	public boolean isCancelUrl(String url) {
-		return url.startsWith(getOkUrl(AuthActivity.this)) && Uri.parse(url).getQueryParameter("error") != null;
-	}
-
-	/**
-	 * Retrieve the SmartCampus correct redirect URL
-	 * @param context
-	 * @return
-	 * @throws NameNotFoundException
-	 */
-	static String getOkUrl(Context context) {
-		return "http://localhost";
-	}
-
 
 }

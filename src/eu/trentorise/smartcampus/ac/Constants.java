@@ -15,6 +15,9 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.ac;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -51,6 +54,8 @@ public class Constants {
      * App authority key
      */
 	public static final String KEY_AUTHORITY = "eu.trentorise.smartcampus.account.AUTHORITY";
+	/**  Key for array of authorities (comma-separated list of values) */
+	public static final String KEY_AUTHORITY_ARRAY = "eu.trentorise.smartcampus.account.AUTHORITY_ARRAY";
     /**
      * App scope key
      */
@@ -103,6 +108,15 @@ public class Constants {
 		throw new NameNotFoundException("Account type should be specified in application metadata");
 	}
 
+	public static Collection<String> getRequiredAuthorities(Context context) throws NameNotFoundException {
+		ApplicationInfo info = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+		if (info != null && info.metaData != null && info.metaData.containsKey(KEY_AUTHORITY_ARRAY)) {
+			String authorities = info.metaData.getString(KEY_AUTHORITY_ARRAY);
+			return Arrays.asList(authorities.split(","));
+		}
+		throw new NameNotFoundException("Authorities should be specified in application metadata");
+	}
+	
 	/**
 	 * Read the account label from application metadata
 	 * @param context

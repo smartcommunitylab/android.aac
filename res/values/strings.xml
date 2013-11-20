@@ -15,4 +15,7 @@
   limitations under the License.
 -->
 <resources>
+    <string name="progress_loading">Loading...</string>
+    <string name="logo">logo</string>
+    <string name="login_msg">Please choose the provider for your login</string>
 </resources>
