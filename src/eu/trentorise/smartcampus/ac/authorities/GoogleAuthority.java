@@ -112,6 +112,7 @@ public class GoogleAuthority extends WebAuthority {
 		} else if (requestCode == RC_AUTH  && resultCode == Activity.RESULT_OK) {
 			authenticate(mActivity, mAuthListener, mClientId, mClientSecret);
 	   } else {
+		   close();
 		   mAuthListener.onAuthFailed("user failure");
 	   }	
 	}
@@ -163,8 +164,12 @@ public class GoogleAuthority extends WebAuthority {
 					mActivity.startActivityForResult(
 							((UserRecoverableAuthException) e).getIntent(),
 							RC_AUTH);
+				} else {
+					close();
+					mAuthListener.onAuthFailed("Failed to create account: "+ e.getMessage());
 				}
 			} else {
+				close();
 				mAuthListener.onAuthFailed("Failed to create account");
 			}
 		}

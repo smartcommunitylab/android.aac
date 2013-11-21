@@ -114,7 +114,13 @@ public class WebAuthority implements AuthorityHandler {
 
 	@Override
 	public void cancel() {
-		mContent.setVisibility(View.GONE);
+		close();
+	}
+
+	protected void close() {
+		if (mContent != null)  {
+			mContent.setVisibility(View.GONE);
+		}
 	}
 	
     private void setUpWebView(int margin) {
@@ -163,6 +169,7 @@ public class WebAuthority implements AuthorityHandler {
 			String url = prepareURL(intent);
 		    mWebView.loadUrl(url);
 		} catch (NameNotFoundException e) {
+			close();
 			mAuthListener.onAuthFailed("Failed to obtain AAC url");
 		}
 	}
@@ -202,6 +209,7 @@ public class WebAuthority implements AuthorityHandler {
 				if (code != null) {
 					new ValidateAsyncTask().execute(code, mClientId, mClientSecret, scope, redirectUri);
 				} else {
+					close();
 					mAuthListener.onAuthFailed("No token provided");
 				}
 				return true;
@@ -227,6 +235,7 @@ public class WebAuthority implements AuthorityHandler {
 				tokenData.setRefresh_token(refresh_token);
 				tokenData.setScope(scope);
 				tokenData.setToken_type(type);
+				close();
 				mAuthListener.onTokenAcquired(tokenData);
 			}
 			if (isCancelUrl(url)) {
@@ -242,9 +251,11 @@ public class WebAuthority implements AuthorityHandler {
 				try {
 					verified  = verifyUrl(url);
 				} catch (NameNotFoundException e) {
+					close();
 					mAuthListener.onAuthFailed("No auth url specified.");
 					return;
 				} catch (Exception e) {
+					close();
 					mAuthListener.onAuthFailed("Authentication problem: "+e.getMessage());
 					return;
 				}	 
@@ -296,6 +307,7 @@ public class WebAuthority implements AuthorityHandler {
 
 		@Override
 		protected void onPostExecute(TokenData data) {
+			close();
 			if (data == null || data.getAccess_token() == null) {
 				mAuthListener.onAuthFailed("Token validation failed");
 			} else {
