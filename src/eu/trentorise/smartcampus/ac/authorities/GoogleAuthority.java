@@ -132,9 +132,9 @@ public class GoogleAuthority extends WebAuthority {
 		protected String doInBackground(String... params) {
 			try {
 				String token = GoogleAuthUtil.getToken(mActivity, params[0], "oauth2:" + USERINFO_SCOPE);
+				GoogleAuthUtil.invalidateToken(mActivity, token);
 				return token;
 			} catch (Exception e) {
-				Log.e(GoogleAuthority.class.getName(), "Failed to create user: " + e.getMessage());
 				this.e = e;
 				return null;
 			}
@@ -165,6 +165,7 @@ public class GoogleAuthority extends WebAuthority {
 							((UserRecoverableAuthException) e).getIntent(),
 							RC_AUTH);
 				} else {
+					Log.e(GoogleAuthority.class.getName(), "Failed to create user: " + e.getMessage());
 					close();
 					mAuthListener.onAuthFailed("Failed to create account: "+ e.getMessage());
 				}
