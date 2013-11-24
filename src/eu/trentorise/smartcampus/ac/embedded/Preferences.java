@@ -100,7 +100,11 @@ public final class Preferences {
 	static void setExpirationTime(Context context, int expires_in) throws NameNotFoundException{
 		SharedPreferences prefs = getPrefs(context);
 		Editor edit = prefs.edit();
-		edit.putLong(EXPIRES_IN, System.currentTimeMillis()+1000*expires_in);
+		 // temporal patch: expires in 1 hour
+		 long expTime = System.currentTimeMillis()+1000L*60*60;
+		 // long expTime = System.currentTimeMillis()+1000*expires_in;
+
+		edit.putLong(EXPIRES_IN, expTime);
 		edit.commit();
 	}
 

@@ -116,9 +116,10 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (mHandler != null) {
-			
+			mHandler.onActivityResult(requestCode, resultCode, data);
+		} else {
+			super.onActivityResult(requestCode, resultCode, data);
 		}
-		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
     @Override

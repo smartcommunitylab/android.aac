@@ -67,7 +67,11 @@ public class EmbeddedSCAccessProvider extends SCAccessProvider{
 			String token = Preferences.getAccessToken(ctx);
 			Long expTime = Preferences.getExpirationTime(ctx);
 			// have a margine of 1 min
-			if (expTime > System.currentTimeMillis() + 60*1000) {
+//			if (expTime > System.currentTimeMillis() + 60*1000) {
+//				return token;
+			// temporal patch: margin of 10 min and not more than 1 hour
+			if (expTime > System.currentTimeMillis() + 10*60*1000 && 
+				expTime - System.currentTimeMillis() < 60*60*1000) {
 				return token;
 			} else {
 				String clientId = Constants.getClientId(ctx);
