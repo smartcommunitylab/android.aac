@@ -40,6 +40,29 @@ import eu.trentorise.smartcampus.ac.network.RemoteConnector;
 public class AccountSCAccessProvider extends SCAccessProvider {
 
 	@Override
+	public boolean isLoggedIn(Context ctx) throws AACException {
+		String aTokenType = Constants.getAccountTokenType(ctx);
+		String accountType;
+		try {
+			accountType = Constants.getAccountType(ctx);
+		} catch (NameNotFoundException e) {
+			throw new AACException(e.getMessage());
+		}
+		final AccountManager am = AccountManager.get(ctx);
+		Account[] accounts = am.getAccountsByType(accountType);
+		if (accounts == null || accounts.length == 0) {
+			return false;
+		} else {
+			Account a = accounts[0];
+			String token = am.peekAuthToken(a, aTokenType);
+			if (token == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
 	public boolean login(Activity activity, Bundle extras) throws AACException {
 		String aTokenType = Constants.getAccountTokenType(activity);
 		String accountType;

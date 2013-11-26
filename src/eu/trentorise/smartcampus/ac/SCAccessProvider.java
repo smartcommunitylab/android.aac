@@ -36,6 +36,14 @@ public abstract class SCAccessProvider {
 		if (Constants.isAccountBasedAccess(ctx)) return new AccountSCAccessProvider();
 		return new EmbeddedSCAccessProvider();
 	}
+
+	/**
+	 * Verify the user is already logged in.
+	 * @param ctx {@link Context} to operate in
+	 * 
+	 * @return true if the login has already been performed
+	 */
+	public abstract boolean isLoggedIn(Context ctx) throws AACException;
 	
 	/**
 	 * Verify the user is already logged in and the necessary token have been obtained. Otherwise,

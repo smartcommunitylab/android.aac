@@ -62,7 +62,6 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
     protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       requestWindowFeature(Window.FEATURE_NO_TITLE); 
-      setContentView(R.layout.authorities);
       setUpAuthorities();
     }
     
@@ -90,6 +89,7 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 			mHandler = AuthorityHelper.getAuthorityHandlerForName(mAuthorities.iterator().next());
 			mHandler.authenticate(this, authListener, getClientId(), getClientSecret());
 		} else {
+		    setContentView(R.layout.authorities);
 			prepareLayout();
 		}
     	

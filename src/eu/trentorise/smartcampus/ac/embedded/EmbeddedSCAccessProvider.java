@@ -36,6 +36,17 @@ import eu.trentorise.smartcampus.ac.network.RemoteConnector;
 public class EmbeddedSCAccessProvider extends SCAccessProvider{
 
 	@Override
+	public boolean isLoggedIn(Context ctx) throws AACException {
+		String token;
+		try {
+			token = Preferences.getAccessToken(ctx);
+		} catch (NameNotFoundException e1) {
+			throw new AACException(e1.getMessage(),e1);
+		} 
+		return token != null;
+	}
+
+	@Override
 	public boolean login(Activity activity, Bundle extras) throws AACException  {
 
 		String clientId = Constants.getClientId(activity);
