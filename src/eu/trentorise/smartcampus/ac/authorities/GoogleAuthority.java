@@ -132,7 +132,6 @@ public class GoogleAuthority extends WebAuthority {
 		protected String doInBackground(String... params) {
 			try {
 				String token = GoogleAuthUtil.getToken(mActivity, params[0], "oauth2:" + USERINFO_SCOPE);
-				GoogleAuthUtil.invalidateToken(mActivity, token);
 				return token;
 			} catch (Exception e) {
 				this.e = e;
