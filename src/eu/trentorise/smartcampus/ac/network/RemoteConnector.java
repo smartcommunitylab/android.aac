@@ -16,12 +16,14 @@
 
 package eu.trentorise.smartcampus.ac.network;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -32,6 +34,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.util.Log;
 import eu.trentorise.smartcampus.ac.AACException;
@@ -120,17 +124,38 @@ public class RemoteConnector {
             	TokenData data = TokenData.valueOf(response);
                 Log.v(TAG, "Successful authentication");
                 return data;
-            }
+            } 
             Log.e(TAG, "Error validating " + resp.getStatusLine());
+            try {
+				JSONObject error = new JSONObject(response);
+				if (error != null && error.has("error")) {
+		            throw new AACException(HttpStatus.SC_UNAUTHORIZED, "OAuth error " + error.optString("error_description"));
+				}
+			} catch (JSONException e) {
+                Log.w(TAG, "Unknown response message:" +resp.getStatusLine());
+			}
             throw new AACException("Error validating " + resp.getStatusLine());
-        } catch (Exception e) {
-            Log.e(TAG, "Exception when getting authtoken", e);
-            if (resp != null) {
-            	throw new AACException(resp.getStatusLine().getStatusCode(), ""+e.getMessage());
-            } else {
-            	throw new AACException(e);
-            }
-        } finally {
+
+//        } catch (Exception e) {
+//            Log.e(TAG, "Exception when getting authtoken", e);
+//            if (resp != null) {
+//            	throw new AACException(resp.getStatusLine().getStatusCode(), ""+e.getMessage());
+//            } else {
+//            	throw new AACException(e);
+//            }
+        } catch (ClientProtocolException e) {
+			if (resp != null) {
+				throw new AACException(resp.getStatusLine().getStatusCode(), "" + e.getMessage());
+			} else {
+				throw new AACException(e);
+			}
+		} catch (IOException e) {
+			if (resp != null) {
+				throw new AACException(resp.getStatusLine().getStatusCode(), "" + e.getMessage());
+			} else {
+				throw new AACException(e);
+			}
+		} finally {
             Log.v(TAG, "refresh token completing");
         }
 	}

@@ -129,8 +129,8 @@ public class WebAuthority implements AuthorityHandler {
         mWebView.setVerticalScrollBarEnabled(false);
         mWebView.setHorizontalScrollBarEnabled(false);
         mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.getSettings().setLoadWithOverviewMode(true);
-        mWebView.getSettings().setUseWideViewPort(true);
+//        mWebView.getSettings().setLoadWithOverviewMode(true);
+//        mWebView.getSettings().setUseWideViewPort(true);
         CookieSyncManager.createInstance(mActivity.getApplicationContext());
         CookieManager cookieManager = CookieManager.getInstance(); 
         cookieManager.removeAllCookie();
