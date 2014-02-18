@@ -15,6 +15,7 @@
  ******************************************************************************/
 package eu.trentorise.smartcampus.ac;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -73,7 +74,7 @@ public abstract class AuthActivity extends AccountAuthenticatorActivity {
 				mAuthorities = Collections.singletonList(intent.getStringExtra(Constants.KEY_AUTHORITY));
 			}
 		} else {
-			mAuthorities = AuthorityHelper.getAuthorities(this);
+			mAuthorities = new ArrayList<String>(AuthorityHelper.getAuthorities(this));
 			for (Iterator<String> iterator = mAuthorities.iterator(); iterator.hasNext();) {
 				String a = iterator.next();
 				if (AuthorityHelper.getAuthorityHandlerForName(a) == null) {
