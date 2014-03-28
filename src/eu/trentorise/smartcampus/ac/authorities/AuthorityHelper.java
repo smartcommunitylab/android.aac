@@ -35,6 +35,7 @@ public class AuthorityHelper {
 	public static final String A_UNITN = "unitn";
 	public static final String A_GOOGLE = "google";
 	public static final String A_GOOGLE_LOCAL = "googlelocal";
+	public static final String A_ANONYMOUS = "anonymous";
 	
 	protected static Map<String,AuthorityHandler> mAuthorityMap = new HashMap<String, AuthorityHandler>();
 	protected static Map<String,String> mAuthorityNameMap = new HashMap<String, String>();
@@ -42,10 +43,12 @@ public class AuthorityHelper {
 		mAuthorityMap.put(A_FBK, new WebAuthority(A_FBK));
 		mAuthorityMap.put(A_UNITN, new WebAuthority(A_UNITN));
 		mAuthorityMap.put(A_GOOGLE_LOCAL, new GoogleAuthority(A_GOOGLE_LOCAL));
+		mAuthorityMap.put(A_ANONYMOUS, new AnonymousAuthority(A_ANONYMOUS));
 		
 		mAuthorityNameMap.put(A_FBK, "FBK");
 		mAuthorityNameMap.put(A_UNITN, "UNITN");
 		mAuthorityNameMap.put(A_GOOGLE_LOCAL, "GOOGLE");
+		mAuthorityNameMap.put(A_ANONYMOUS, "ANONYMOUS");
 
 	}
 	
