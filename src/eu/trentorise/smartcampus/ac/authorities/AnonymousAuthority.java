@@ -49,6 +49,7 @@ public class AnonymousAuthority extends WebAuthority {
 		mClientId = clientId;
 		mClientSecret = clientSecret;
 		mToken = new DeviceUuidFactory(activity).getDeviceUuid().toString();
+		setUp();
 	}
 
 	@Override
