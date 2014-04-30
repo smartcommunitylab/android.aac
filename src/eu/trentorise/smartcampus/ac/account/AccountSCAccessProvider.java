@@ -160,6 +160,7 @@ public class AccountSCAccessProvider extends SCAccessProvider {
 					am.invalidateAuthToken(accountType, token);
 					am.setUserData(a, Constants.KEY_REFRESH_TOKEN+aTokenType, null);
 					am.setUserData(a, Constants.KEY_EXPIRES_IN+aTokenType, null);
+					am.removeAccount(a, null, null);
 					return true;
 				} catch (NameNotFoundException e) {
 					Log.e(EmbeddedSCAccessProvider.class.getName(), ""+e.getMessage());
