@@ -33,7 +33,7 @@ public final class Preferences {
 	
 	public static final String APP_METADATA_SHARED_PACKAGE = "SHARED_PACKAGE";
 	// Shared package path
-	private static final String SHARED_PACKAGE = "eu.trentorise.smartcampus.launcher";
+	private static final String SHARED_PACKAGE = "it.smartcampuslab.launcher";
 
 	// Name for preferences
 	private static final String COMMON_PREF = "COMMON_PREF";
